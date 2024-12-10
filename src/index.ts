@@ -170,6 +170,12 @@ function efetuarDeposito(
   numeroConta: number,
   valorDeposito: number
 ) {
+  if (valorDeposito <= 0) {
+    console.log(
+      `Valor inválido para deposito - R$ ${valorDeposito.toFixed(2)}`
+    );
+    return;
+  }
   // buscar a conta (entidade)
   // atualizar o saldo na conta (entidade)
   for (let conta of contas) {
@@ -195,6 +201,10 @@ function efetuarSaque(
   numeroConta: number,
   valorSaque: number
 ) {
+  if (valorSaque <= 0) {
+    console.log(`Valor inválido para saque - R$ ${valorSaque.toFixed(2)}`);
+    return;
+  }
   // validar se a conta possui saldo disponível
   const saldoConta = calcularSaldo(agencia, numeroConta);
   if (saldoConta < valorSaque) {
@@ -238,7 +248,7 @@ function imprimirExtrato(agencia: number, numeroConta: number) {
       }`
     );
   }
-  console.log(`O saldo da conta é de R$ ${saldo.toFixed(0)}`)
+  console.log(`O saldo da conta é de R$ ${saldo.toFixed(0)}`);
 }
 
 // Executa o programa
