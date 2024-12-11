@@ -13,6 +13,8 @@
 import { randomUUID } from "node:crypto";
 import Scanner from "@codeea/scanner";
 
+import fs from "node:fs/promises";
+
 type Conta = {
   nomeCliente: string;
   numero: number;
@@ -90,6 +92,12 @@ async function main() {
       case 4:
         imprimirExtrato(agencia, numeroConta);
         break;
+      case 5:
+        const nomeArquivo = await scanner.question(
+          "Informe o nome do arquivo: "
+        );
+        await salvarExtrato(agencia, numeroConta, nomeArquivo);
+        break;
       default:
         console.log("Operação inválida");
         break;
@@ -103,6 +111,7 @@ function imprimeMenu() {
     2 - DEPÓSITAR
     3 - SACAR
     4 - EXTRATO
+    5 - EXPORTAR EXTRATO EM CSV
     0 - SAIR
   `;
   console.log(menu);
@@ -248,6 +257,33 @@ function imprimirExtrato(agencia: number, numeroConta: number) {
       }`
     );
   }
+  console.log(`O saldo da conta é de R$ ${saldo.toFixed(0)}`);
+}
+
+async function salvarExtrato(
+  agencia: number,
+  numeroConta: number,
+  nomeArquivo: string
+) {
+  const transacoesConta = buscarTransacoesConta(agencia, numeroConta);
+  console.log(`Extrato de transações da conta ${agencia}/${numeroConta}`);
+  let saldo = 0;
+  let fileLines = "id,tipo,operacao,valor";
+
+  for (const transacao of transacoesConta) {
+    // const valorTransacao =
+    //   transacao.tipo === "C" ? transacao.valor : transacao.valor * -1;
+    let valorTransacao = transacao.valor;
+    if (transacao.tipo === "D") {
+      valorTransacao = transacao.valor * -1;
+    }
+    saldo += valorTransacao;
+    fileLines += `\n${transacao.id},${transacao.tipo},${
+      transacao.operacao
+    },${valorTransacao.toFixed(2)}`;
+  }
+
+  await fs.appendFile(`./public/${nomeArquivo || "arquivo"}.csv`, fileLines);
   console.log(`O saldo da conta é de R$ ${saldo.toFixed(0)}`);
 }
 
